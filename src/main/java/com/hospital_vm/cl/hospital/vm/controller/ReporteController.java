@@ -14,11 +14,14 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/reporte")
+@RequestMapping("reporte")
 public class ReporteController {
 
+    @Autowired
     private AtencionService atencionService;
+    @Autowired
     private PacienteService pacienteService;
+    @Autowired
     private MedicoService medicoService;
 
     @GetMapping("/atenciones/paciente/{id}")
@@ -27,7 +30,13 @@ public class ReporteController {
                 .filter(p -> p.getId().equals(id))
                 .findFirst()
                 .orElse(null);
-        return ResponseEntity.ok(atencionService.getAtencionesPorPaciente(paciente));
+
+        if (paciente == null) {
+            return ResponseEntity.notFound().build(); // Retorna 404 si no se encuentra el paciente
+        }
+
+        List<Atencion> atenciones = atencionService.getAtencionesPorPaciente(paciente);
+        return ResponseEntity.ok(atenciones);
     }
     @GetMapping("/atenciones/medico/{id}")
     public ResponseEntity<List<Atencion>> getAtencionesPorMedico(@PathVariable Long id) {
